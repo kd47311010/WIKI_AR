@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="Hide Radar" android:id="@+id/showRadar"> </item>
+
+    <item android:title="Hide Zoom Bar" android:id="@+id/showZoomBar"> </item>
+
+    <item android:title="Exit" android:id="@+id/exit"> </item>
+
+</menu>
