@@ -96,12 +96,15 @@ public class MainActivity extends AugmentedActivity {
         updateData(location.getLatitude(), location.getLongitude(), location.getAltitude());
     }
 
+
+    /* 아이콘(마커)터치 리스너*/
     @Override
     protected void markerTouched(Marker marker) {
         Toast t = Toast.makeText(getApplicationContext(), marker.getName(), Toast.LENGTH_SHORT);
         t.setGravity(Gravity.CENTER, 0, 0);
         t.show();
     }
+
 
     @Override
     protected void updateDataOnZoom() {

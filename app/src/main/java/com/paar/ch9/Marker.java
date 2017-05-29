@@ -4,12 +4,13 @@ import java.text.DecimalFormat;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Icon;
 import android.location.Location;
 import android.util.Log;
 
 public class Marker implements Comparable<Marker> {
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("@#");
-        
+
     private static final Vector symbolVector = new Vector(0, 0, 0);
     private static final Vector textVector = new Vector(0, 1, 0);
 
@@ -22,7 +23,7 @@ public class Marker implements Comparable<Marker> {
     private final float[] screenPositionArray = new float[3];
 
     private float initialY = 0.0f;
-    
+
     private volatile static CameraModel cam = null;
 
     private volatile PaintableBoxedText textBox = null;
@@ -30,7 +31,7 @@ public class Marker implements Comparable<Marker> {
 
     protected final float[] symbolArray = new float[3];
     protected final float[] textArray = new float[3];
-    
+
     protected volatile PaintableObject gpsSymbol = null;
     protected volatile PaintablePosition symbolContainer = null;
     protected String name = null;
@@ -92,6 +93,7 @@ public class Marker implements Comparable<Marker> {
     public synchronized boolean isInView() {
         return this.isInView;
     }
+   
 
     public synchronized Vector getScreenPosition() {
         symbolXyzRelativeToCameraView.get(symbolArray);
@@ -114,17 +116,17 @@ public class Marker implements Comparable<Marker> {
         if (symbolContainer==null || textContainer==null) return 0f;
         return symbolContainer.getHeight()+textContainer.getHeight();
     }
-    
+
     public synchronized float getWidth() {
         if (symbolContainer==null || textContainer==null) return 0f;
         float w1 = textContainer.getWidth();
         float w2 = symbolContainer.getWidth();
         return (w1>w2)?w1:w2;
     }
-    
+
     public synchronized void update(Canvas canvas, float addX, float addY) {
     	if (canvas==null) throw new NullPointerException();
-    	
+
     	if (cam==null) cam = new CameraModel(canvas.getWidth(), canvas.getHeight(), true);
     	cam.set(canvas.getWidth(), canvas.getHeight(), false);
         cam.setViewAngle(CameraModel.DEFAULT_VIEW_ANGLE);
@@ -135,11 +137,11 @@ public class Marker implements Comparable<Marker> {
 
 	private synchronized void populateMatrices(CameraModel cam, float addX, float addY) {
 		if (cam==null) throw new NullPointerException();
-		
+
 		tmpSymbolVector.set(symbolVector);
-		tmpSymbolVector.add(locationXyzRelativeToPhysicalLocation);        
+		tmpSymbolVector.add(locationXyzRelativeToPhysicalLocation);
         tmpSymbolVector.prod(ARData.getRotationMatrix());
-		
+
 		tmpTextVector.set(textVector);
 		tmpTextVector.add(locationXyzRelativeToPhysicalLocation);
 		tmpTextVector.prod(ARData.getRotationMatrix());
@@ -157,7 +159,7 @@ public class Marker implements Comparable<Marker> {
 		float scale = range / Radar.RADIUS;
 		locationXyzRelativeToPhysicalLocation.get(locationArray);
         float x = locationArray[0] / scale;
-        float y = locationArray[2] / scale; // z==y Switched on purpose 
+        float y = locationArray[2] / scale; // z==y Switched on purpose
         symbolXyzRelativeToCameraView.get(symbolArray);
 		if ((symbolArray[2] < -1f) && ((x*x+y*y)<(Radar.RADIUS*Radar.RADIUS))) {
 			isOnRadar = true;
@@ -172,7 +174,7 @@ public class Marker implements Comparable<Marker> {
         float y1 = symbolArray[1] + (getHeight()/2);
         float x2 = symbolArray[0] - (getWidth()/2);
         float y2 = symbolArray[1] - (getHeight()/2);
-        if (x1>=-1 && x2<=(cam.getWidth()) 
+        if (x1>=-1 && x2<=(cam.getWidth())
             &&
             y1>=-1 && y2<=(cam.getHeight())
         ) {
@@ -182,16 +184,16 @@ public class Marker implements Comparable<Marker> {
 
     public synchronized void calcRelativePosition(Location location) {
 		if (location==null) throw new NullPointerException();
-		
+
 	    updateDistance(location);
-	    
+
 		if (physicalLocation.getAltitude()==0.0) physicalLocation.setAltitude(location.getAltitude());
-		 
+
 		PhysicalLocationUtility.convLocationToVector(location, physicalLocation, locationXyzRelativeToPhysicalLocation);
 		this.initialY = locationXyzRelativeToPhysicalLocation.getY();
 		updateRadar();
     }
-    
+
     private synchronized void updateDistance(Location location) {
         if (location==null) throw new NullPointerException();
 
@@ -211,7 +213,7 @@ public class Marker implements Comparable<Marker> {
     private synchronized boolean isMarkerOnMarker(Marker marker, boolean reflect) {
         marker.getScreenPosition().get(screenPositionArray);
         float x = screenPositionArray[0];
-        float y = screenPositionArray[1];        
+        float y = screenPositionArray[1];
         boolean middleOfMarker = isPointOnMarker(x,y,this);
         if (middleOfMarker) return true;
 
@@ -254,7 +256,7 @@ public class Marker implements Comparable<Marker> {
         float y2 = myY+adjHeight;
 
         if (x>=x1 && x<=x2 && y>=y1 && y<=y2) return true;
-        
+
         return false;
 	}
 
@@ -262,7 +264,7 @@ public class Marker implements Comparable<Marker> {
         if (canvas==null) throw new NullPointerException();
 
         if (!isOnRadar || !isInView) return;
-        
+
         if (debugTouchZone) drawTouchZone(canvas);
         if (debugCollisionZone) drawCollisionZone(canvas);
         drawIcon(canvas);
@@ -271,10 +273,10 @@ public class Marker implements Comparable<Marker> {
 
     protected synchronized void drawCollisionZone(Canvas canvas) {
         if (canvas==null) throw new NullPointerException();
-        
+
         getScreenPosition().get(screenPositionArray);
         float x = screenPositionArray[0];
-        float y = screenPositionArray[1];        
+        float y = screenPositionArray[1];
 
         float width = getWidth();
         float height = getHeight();
@@ -297,12 +299,12 @@ public class Marker implements Comparable<Marker> {
         Log.w("collisionBox", "ur (x="+x2+" y="+y2+")");
         Log.w("collisionBox", "ll (x="+x3+" y="+y3+")");
         Log.w("collisionBox", "lr (x="+x4+" y="+y4+")");
-        
+
         if (collisionBox==null) collisionBox = new PaintableBox(width,height,Color.WHITE,Color.RED);
         else collisionBox.set(width,height);
 
         float currentAngle = Utilities.getAngle(symbolArray[0], symbolArray[1], textArray[0], textArray[1])+90;
-        
+
         if (collisionPosition==null) collisionPosition = new PaintablePosition(collisionBox, x1, y1, currentAngle, 1);
         else collisionPosition.set(collisionBox, x1, y1, currentAngle, 1);
         collisionPosition.paint(canvas);
@@ -310,11 +312,11 @@ public class Marker implements Comparable<Marker> {
 
     protected synchronized void drawTouchZone(Canvas canvas) {
         if (canvas==null) throw new NullPointerException();
-        
+
         if (gpsSymbol==null) return;
-        
+
         symbolXyzRelativeToCameraView.get(symbolArray);
-        textXyzRelativeToCameraView.get(textArray);        
+        textXyzRelativeToCameraView.get(textArray);
         float x1 = symbolArray[0];
         float y1 = symbolArray[1];
         float x2 = textArray[0];
@@ -326,12 +328,12 @@ public class Marker implements Comparable<Marker> {
         float currentAngle = Utilities.getAngle(symbolArray[0], symbolArray[1], textArray[0], textArray[1])+90;
         adjX -= (width/2);
         adjY -= (gpsSymbol.getHeight()/2);
-        
+
         Log.w("touchBox", "ul (x="+(adjX)+" y="+(adjY)+")");
         Log.w("touchBox", "ur (x="+(adjX+width)+" y="+(adjY)+")");
         Log.w("touchBox", "ll (x="+(adjX)+" y="+(adjY+height)+")");
         Log.w("touchBox", "lr (x="+(adjX+width)+" y="+(adjY+height)+")");
-        
+
         if (touchBox==null) touchBox = new PaintableBox(width,height,Color.WHITE,Color.GREEN);
         else touchBox.set(width,height);
 
@@ -339,7 +341,7 @@ public class Marker implements Comparable<Marker> {
         else touchPosition.set(touchBox, adjX, adjY, currentAngle, 1);
         touchPosition.paint(canvas);
     }
-    
+
     protected synchronized void drawIcon(Canvas canvas) {
     	if (canvas==null) throw new NullPointerException();
 
@@ -359,10 +361,10 @@ public class Marker implements Comparable<Marker> {
 
     protected synchronized void drawText(Canvas canvas) {
 		if (canvas==null) throw new NullPointerException();
-		
+
 	    String textStr = null;
 	    if (distance<1000.0) {
-	        textStr = name + " ("+ DECIMAL_FORMAT.format(distance) + "m)";          
+	        textStr = name + " ("+ DECIMAL_FORMAT.format(distance) + "m)";
 	    } else {
 	        double d=distance/1000.0;
 	        textStr = name + " (" + DECIMAL_FORMAT.format(d) + "km)";
@@ -388,14 +390,14 @@ public class Marker implements Comparable<Marker> {
 
     public synchronized int compareTo(Marker another) {
         if (another==null) throw new NullPointerException();
-        
+
         return name.compareTo(another.getName());
     }
 
     @Override
     public synchronized boolean equals(Object marker) {
         if(marker==null || name==null) throw new NullPointerException();
-        
+
         return name.equals(((Marker)marker).getName());
     }
 }

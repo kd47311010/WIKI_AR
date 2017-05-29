@@ -26,8 +26,8 @@ public class SensorsActivity extends Activity implements SensorEventListener, Lo
     private static final String TAG = "SensorsActivity";
     private static final AtomicBoolean computing = new AtomicBoolean(false);
 
-    private static final int MIN_TIME = 30 * 1000;
-    private static final int MIN_DISTANCE = 10;
+    private static final int MIN_TIME = 1 * 1000;
+    private static final int MIN_DISTANCE = 1;
 
     private static final float temp[] = new float[9];
     private static final float rotation[] = new float[9];
